@@ -1,0 +1,81 @@
+{
+  "info": {
+    "_postman_id": "66cfb337-cc8b-42ba-8db9-4df736ab5107",
+    "name": "Team Task & Project Tracker",
+    "description": "CRUD, dashboard, filtering, and validation examples for the Team Tracker API. Run create requests before dependent requests.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3000" },
+    { "key": "projectId", "value": "1" },
+    { "key": "memberId", "value": "1" },
+    { "key": "taskId", "value": "1" }
+  ],
+  "item": [
+    {
+      "name": "Health and dashboard",
+      "item": [
+        { "name": "Health", "request": { "method": "GET", "url": "{{baseUrl}}/api/health" } },
+        { "name": "Overview counts", "request": { "method": "GET", "url": "{{baseUrl}}/api/overview" } }
+      ]
+    },
+    {
+      "name": "Projects",
+      "item": [
+        { "name": "List projects", "request": { "method": "GET", "url": "{{baseUrl}}/api/projects" } },
+        {
+          "name": "Create project (valid)",
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('projectId', pm.response.json().data.id);"], "type": "text/javascript" } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Postman project\",\"description\":\"Created from the collection\",\"start_date\":\"2026-01-01\",\"end_date\":\"2026-12-31\"}" }, "url": "{{baseUrl}}/api/projects" }
+        },
+        { "name": "Create project (invalid)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"description\":\"Missing required name\"}" }, "url": "{{baseUrl}}/api/projects" } },
+        { "name": "Read project", "request": { "method": "GET", "url": "{{baseUrl}}/api/projects/{{projectId}}" } },
+        { "name": "Read project (missing)", "request": { "method": "GET", "url": "{{baseUrl}}/api/projects/999999" } },
+        { "name": "Update project (valid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Updated Postman project\",\"description\":\"Updated description\"}" }, "url": "{{baseUrl}}/api/projects/{{projectId}}" } },
+        { "name": "Update project (invalid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"   \"}" }, "url": "{{baseUrl}}/api/projects/{{projectId}}" } }
+      ]
+    },
+    {
+      "name": "Team members",
+      "item": [
+        { "name": "List members", "request": { "method": "GET", "url": "{{baseUrl}}/api/members" } },
+        {
+          "name": "Create member (valid)",
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('memberId', pm.response.json().data.id);"], "type": "text/javascript" } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Taylor Example\",\"email\":\"taylor.postman@example.com\",\"role\":\"Developer\"}" }, "url": "{{baseUrl}}/api/members" }
+        },
+        { "name": "Create member (invalid email)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Invalid Email\",\"email\":\"not-an-email\"}" }, "url": "{{baseUrl}}/api/members" } },
+        { "name": "Read member", "request": { "method": "GET", "url": "{{baseUrl}}/api/members/{{memberId}}" } },
+        { "name": "Read member (missing)", "request": { "method": "GET", "url": "{{baseUrl}}/api/members/999999" } },
+        { "name": "Update member (valid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Taylor Updated\",\"email\":\"taylor.postman@example.com\",\"role\":\"Lead developer\"}" }, "url": "{{baseUrl}}/api/members/{{memberId}}" } },
+        { "name": "Update member (invalid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"name\":\"Taylor\",\"email\":\"invalid\"}" }, "url": "{{baseUrl}}/api/members/{{memberId}}" } }
+      ]
+    },
+    {
+      "name": "Tasks",
+      "item": [
+        { "name": "List tasks", "request": { "method": "GET", "url": "{{baseUrl}}/api/tasks" } },
+        { "name": "Filter tasks", "request": { "method": "GET", "url": "{{baseUrl}}/api/tasks?project_id={{projectId}}&status=To%20Do&priority=Medium" } },
+        { "name": "Filter unassigned tasks", "request": { "method": "GET", "url": "{{baseUrl}}/api/tasks?member_id=unassigned" } },
+        {
+          "name": "Create task (valid)",
+          "event": [{ "listen": "test", "script": { "exec": ["if (pm.response.code === 201) pm.collectionVariables.set('taskId', pm.response.json().data.id);"], "type": "text/javascript" } }],
+          "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\":\"Postman task\",\"description\":\"Created from the collection\",\"project_id\":{{projectId}},\"member_id\":{{memberId}},\"status\":\"To Do\",\"priority\":\"Medium\",\"due_date\":\"2026-12-01\"}" }, "url": "{{baseUrl}}/api/tasks" }
+        },
+        { "name": "Create task (invalid status)", "request": { "method": "POST", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\":\"Bad task\",\"project_id\":{{projectId}},\"status\":\"Blocked\"}" }, "url": "{{baseUrl}}/api/tasks" } },
+        { "name": "Read task", "request": { "method": "GET", "url": "{{baseUrl}}/api/tasks/{{taskId}}" } },
+        { "name": "Read task (missing)", "request": { "method": "GET", "url": "{{baseUrl}}/api/tasks/999999" } },
+        { "name": "Update task (valid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\":\"Updated Postman task\",\"project_id\":{{projectId}},\"member_id\":{{memberId}},\"status\":\"In Progress\",\"priority\":\"High\"}" }, "url": "{{baseUrl}}/api/tasks/{{taskId}}" } },
+        { "name": "Update task (invalid)", "request": { "method": "PUT", "header": [{ "key": "Content-Type", "value": "application/json" }], "body": { "mode": "raw", "raw": "{\"title\":\"Bad update\",\"project_id\":{{projectId}},\"priority\":\"Urgent\"}" }, "url": "{{baseUrl}}/api/tasks/{{taskId}}" } }
+      ]
+    },
+    {
+      "name": "Cleanup (run last)",
+      "item": [
+        { "name": "Delete task", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/tasks/{{taskId}}" } },
+        { "name": "Delete member", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/members/{{memberId}}" } },
+        { "name": "Delete project", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/projects/{{projectId}}" } }
+      ]
+    }
+  ]
+}

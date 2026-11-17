@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Create account | Team Tracker</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet">
+</head>
+<body class="auth-page">
+  <main class="container py-5">
+    <div class="auth-card card shadow-sm mx-auto">
+      <div class="card-body p-4 p-md-5">
+        <a class="text-decoration-none fw-semibold" href="/">Team Tracker</a>
+        <h1 class="h3 mt-4">Create your account</h1>
+        <p class="text-secondary">Start a team workspace or join your teammates.</p>
+        <div id="auth-error" class="alert alert-danger d-none" role="alert"></div>
+        <form id="register-form">
+          <div class="mb-3">
+            <label class="form-label" for="name">Your name</label>
+            <input class="form-control" id="name" name="name" autocomplete="name" maxlength="120" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="email">Email</label>
+            <input class="form-control" id="email" name="email" type="email" autocomplete="email" maxlength="254" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label" for="password">Password</label>
+            <input class="form-control" id="password" name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required>
+            <div class="form-text">Use at least 8 characters.</div>
+          </div>
+          <fieldset class="mb-3">
+            <legend class="form-label fs-6">Team workspace</legend>
+            <div class="form-check">
+              <input class="form-check-input" id="mode-create" name="mode" type="radio" value="create" checked>
+              <label class="form-check-label" for="mode-create">Create a new team</label>
+            </div>
+            <div class="form-check">
+              <input class="form-check-input" id="mode-join" name="mode" type="radio" value="join">
+              <label class="form-check-label" for="mode-join">Join an existing team with an invite code</label>
+            </div>
+          </fieldset>
+          <div class="mb-3" id="team-name-field">
+            <label class="form-label" for="teamName">Team name</label>
+            <input class="form-control" id="teamName" name="teamName" maxlength="150" required>
+          </div>
+          <div class="mb-3 d-none" id="invite-code-field">
+            <label class="form-label" for="inviteCode">Team invite code</label>
+            <input class="form-control text-uppercase" id="inviteCode" name="inviteCode" autocomplete="off" maxlength="24">
+            <div class="form-text">Ask a teammate for the invite code shown in their workspace.</div>
+          </div>
+          <button class="btn btn-primary w-100" type="submit">Create account</button>
+        </form>
+        <p class="text-secondary text-center mt-4 mb-0">Already registered? <a href="/login.html">Log in</a></p>
+      </div>
+    </div>
+  </main>
+  <script src="/auth.js"></script>
+</body>
+</html>
