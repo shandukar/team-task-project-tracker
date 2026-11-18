@@ -52,7 +52,7 @@ function readCookie(req, name) {
 async function createSession(db, userId, res) {
   const token = crypto.randomBytes(32).toString('base64url');
   await db.execute(
-    'INSERT INTO auth_sessions (token_hash, user_id, expires_at) VALUES (?, ?, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 7 DAY))',
+    "INSERT INTO auth_sessions (token_hash, user_id, expires_at) VALUES (?, ?, CURRENT_TIMESTAMP + INTERVAL '7 days')",
     [hashToken(token), userId]
   );
   if (res) setSessionCookie(res, token);

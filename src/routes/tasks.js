@@ -55,8 +55,9 @@ function createTasksRouter(db) {
       const task = validateTask(req.body);
       const [result] = await db.execute(
         'INSERT INTO tasks (title, description, project_id, member_id, status, priority, due_date)\n' +
-        'SELECT ?, ?, p.id, ?, ?, ?, ? FROM projects p\n' +
-        'WHERE p.id = ? AND p.team_id = ? AND (? IS NULL OR EXISTS (SELECT 1 FROM team_members m WHERE m.id = ? AND m.team_id = ?))',
+        'SELECT $1, $2, p.id, $3, $4, $5, $6 FROM projects p\n' +
+        'WHERE p.id = $7 AND p.team_id = $8 AND ($9::integer IS NULL OR EXISTS (SELECT 1 FROM team_members m WHERE m.id = $10 AND m.team_id = $11))\n' +
+        'RETURNING id',
         [
           task.title, task.description, task.member_id, task.status, task.priority, task.due_date,
           task.project_id, req.user.team_id, task.member_id, task.member_id, req.user.team_id

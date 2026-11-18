@@ -1,12 +1,12 @@
 # Team Task & Project Tracker
 
-A beginner-friendly team tracker built with Node.js, Express, MySQL, Bootstrap 5, and browser `fetch()`. Teams have separate workspaces; team members sign in with an account, and a team invite code lets teammates join the same workspace. The browser only talks to the REST API; SQL stays on the server.
+A beginner-friendly team tracker built with Node.js, Express, PostgreSQL, Bootstrap 5, and browser `fetch()`. Teams have separate workspaces; team members sign in with an account, and a team invite code lets teammates join the same workspace. The browser only talks to the REST API; SQL stays on the server.
 
 ## Requirements
 
 - Node.js 18 or newer and npm
-- MySQL 8.0 or newer (the schema uses `CHECK` constraints)
-- A MySQL account that can create/use the `team_task_tracker` database
+- PostgreSQL 12 or newer
+- A PostgreSQL database and user for `team_task_tracker`
 
 ## Setup and start
 
@@ -16,7 +16,7 @@ A beginner-friendly team tracker built with Node.js, Express, MySQL, Bootstrap 5
    npm install
    ```
 
-2. Create a local environment file by copying `.env.example` to `.env`. Set `DB_USER` and `DB_PASSWORD` to your MySQL account. `DB_HOST` and `DB_PORT` default to `localhost` and `3306`; change them if your MySQL server listens elsewhere. The schema and default database name are `team_task_tracker`; keep `DB_NAME=team_task_tracker`.
+2. Create a local environment file by copying `.env.example` to `.env`. Set `PGUSER` and `PGPASSWORD` to your PostgreSQL account. `PGHOST` and `PGPORT` default to `localhost` and `5432`; `PGDATABASE` defaults to `team_task_tracker`. Alternatively, set `DATABASE_URL` to your PostgreSQL connection string. Set `PGSSL=true` if your database provider requires SSL.
 
 3. Create the schema and tables:
 
@@ -24,7 +24,7 @@ A beginner-friendly team tracker built with Node.js, Express, MySQL, Bootstrap 5
    npm run db:setup
    ```
 
-   For an existing installation, this also moves existing projects and members into a `Migrated workspace` and prints its invite code.
+   This creates the tables in the PostgreSQL database configured above. It does not import data from an existing MySQL database.
 
 4. Optionally add the sample records to an empty database:
 
@@ -42,26 +42,26 @@ A beginner-friendly team tracker built with Node.js, Express, MySQL, Bootstrap 5
 
    Open [http://localhost:3000](http://localhost:3000), create an account, and choose whether to create a team or join one with its invite code. Share the code shown in the workspace with teammates. Set `PORT` in `.env` to use a different port. While developing, use `npm run dev`.
 
-## MySQL connection troubleshooting on Windows
+## PostgreSQL connection troubleshooting on Windows
 
-1. In PowerShell, check whether a MySQL Windows service is installed and running:
-
-   ```powershell
-   Get-Service *mysql* | Select-Object Name, Status, StartType
-   ```
-
-   If a service is listed as `Stopped`, start it from an elevated PowerShell window using its displayed service name, for example `Start-Service MySQL80`. If no service is listed, install MySQL Server; MySQL Workbench alone is not the database server.
-
-2. Check whether a process is listening on TCP port 3306:
+1. In PowerShell, check whether a PostgreSQL Windows service is installed and running:
 
    ```powershell
-   Get-NetTCPConnection -State Listen -LocalPort 3306 -ErrorAction SilentlyContinue
-   Test-NetConnection 127.0.0.1 -Port 3306
+   Get-Service *postgres* | Select-Object Name, Status, StartType
    ```
 
-   A listener should appear in the first command and `TcpTestSucceeded` should be `True` in the second. If not, check the MySQL server's configured port and TCP bind address. Set `DB_PORT` (and, if needed, `DB_HOST`) in `.env` to match. `ECONNREFUSED` indicates that the TCP connection was refused; it usually means the service is stopped or the configured host/port has no listener, rather than a bad password.
+   If a service is listed as `Stopped`, start it from an elevated PowerShell window using its displayed service name. If no service is listed, install PostgreSQL or use a hosted PostgreSQL service.
 
-3. After MySQL is listening and `.env` has the matching host, port, and your account credentials, create the schema, add sample rows, and start the app:
+2. Check whether a process is listening on TCP port 5432:
+
+   ```powershell
+   Get-NetTCPConnection -State Listen -LocalPort 5432 -ErrorAction SilentlyContinue
+   Test-NetConnection 127.0.0.1 -Port 5432
+   ```
+
+   A listener should appear in the first command and `TcpTestSucceeded` should be `True` in the second. If not, check the PostgreSQL server's configured port and bind address. Set `PGPORT` (and, if needed, `PGHOST`) in `.env` to match.
+
+3. After PostgreSQL is listening and `.env` has the matching connection settings, create the schema, add sample rows, and start the app:
 
    ```powershell
    npm.cmd run db:setup
@@ -70,6 +70,15 @@ A beginner-friendly team tracker built with Node.js, Express, MySQL, Bootstrap 5
    ```
 
    The seed script only runs when the projects table is empty. Refresh [http://localhost:3000](http://localhost:3000) after the server starts.
+
+## Deploying to Render
+
+1. Create a Render PostgreSQL database and a Node.js web service connected to this repository. Choose the same region for both.
+2. Configure the web service's `DATABASE_URL` environment variable using the database's internal connection URL. Set `NODE_ENV` to `production`.
+3. Use `npm ci` as the build command and `npm start` as the start command. Set `/api/health` as the health check path.
+4. Run `npm run db:setup` against the hosted database once, then open the Render service's public URL and create a team account.
+
+The app listens on Render's `PORT`. Existing records in the local MySQL database are not automatically copied to PostgreSQL.
 
 ## Features
 
@@ -141,7 +150,7 @@ Import `postman/Team-Task-Project-Tracker.postman_collection.json` in Postman (*
 
 ## Tests
 
-Run the API and validation tests (they use an injected database stub and do not require MySQL):
+Run the API and validation tests (they use an injected database stub and do not require PostgreSQL):
 
 ```sh
 npm test
@@ -150,7 +159,7 @@ npm test
 ## Project structure
 
 ```text
-database/   MySQL schema
+database/   PostgreSQL schema
 postman/    Importable API collection
 public/     Bootstrap page, styles, and browser JavaScript
 scripts/    Database setup and sample-data scripts
@@ -159,7 +168,7 @@ src/
   routes/      REST endpoints for auth, projects, members, tasks, overview
   auth.js      Password hashing and session cookie helpers
   app.js       Express app configuration
-  db.js        MySQL connection pool
+  db.js        PostgreSQL connection pool and query adapter
   validation.js Input validation and allowed task values
   server.js    App entry point
 test/       Node test-runner API tests

@@ -18,7 +18,7 @@ function createProjectsRouter(db) {
     try {
       const project = validateProject(req.body);
       const [result] = await db.execute(
-        'INSERT INTO projects (team_id, name, description, start_date, end_date) VALUES (?, ?, ?, ?, ?)',
+        'INSERT INTO projects (team_id, name, description, start_date, end_date) VALUES (?, ?, ?, ?, ?) RETURNING id',
         [req.user.team_id, project.name, project.description, project.start_date, project.end_date]
       );
       const [rows] = await db.execute('SELECT * FROM projects WHERE id = ? AND team_id = ?', [result.insertId, req.user.team_id]);

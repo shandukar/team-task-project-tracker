@@ -31,7 +31,7 @@ function createAuthRouter(db) {
       if (registration.mode === 'create') {
         inviteCode = newInviteCode();
         const [teamResult] = await connection.execute(
-          'INSERT INTO teams (name, invite_code) VALUES (?, ?)',
+          'INSERT INTO teams (name, invite_code) VALUES (?, ?) RETURNING id',
           [registration.teamName, inviteCode]
         );
         teamId = teamResult.insertId;
@@ -48,7 +48,7 @@ function createAuthRouter(db) {
         teamId = teams[0].id;
       }
       const [userResult] = await connection.execute(
-        'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?)',
+        'INSERT INTO users (name, email, password_hash) VALUES (?, ?, ?) RETURNING id',
         [registration.name, registration.email, passwordHash]
       );
       await connection.execute(

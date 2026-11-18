@@ -11,7 +11,7 @@ function requireAuth(db) {
          JOIN users u ON u.id = s.user_id
          JOIN team_memberships tm ON tm.user_id = u.id
          JOIN teams t ON t.id = tm.team_id
-         WHERE s.token_hash = ? AND s.expires_at > UTC_TIMESTAMP()`,
+         WHERE s.token_hash = ? AND s.expires_at > CURRENT_TIMESTAMP`,
         [hashToken(token)]
       );
       if (!rows.length) return res.status(401).json({ error: { message: 'Your session has expired. Please log in again.' } });

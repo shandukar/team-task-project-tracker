@@ -18,7 +18,7 @@ function createMembersRouter(db) {
     try {
       const member = validateMember(req.body);
       const [result] = await db.execute(
-        'INSERT INTO team_members (team_id, name, email, role) VALUES (?, ?, ?, ?)',
+        'INSERT INTO team_members (team_id, name, email, role) VALUES (?, ?, ?, ?) RETURNING id',
         [req.user.team_id, member.name, member.email, member.role]
       );
       const [rows] = await db.execute('SELECT * FROM team_members WHERE id = ? AND team_id = ?', [result.insertId, req.user.team_id]);

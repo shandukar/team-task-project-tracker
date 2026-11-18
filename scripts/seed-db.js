@@ -12,24 +12,26 @@ async function seed() {
     }
     const inviteCode = crypto.randomBytes(12).toString('hex').toUpperCase();
     const [team] = await connection.execute(
-      'INSERT INTO teams (name, invite_code) VALUES (?, ?)',
+      'INSERT INTO teams (name, invite_code) VALUES (?, ?) RETURNING id',
       ['Demo Team', inviteCode]
     );
     const [projects] = await connection.query(
       `INSERT INTO projects (team_id, name, description, start_date, end_date) VALUES
        (?, 'Website refresh', 'Improve the team website and content.', '2026-01-05', '2026-03-30'),
-       (?, 'Mobile app launch', 'Prepare the first mobile app release.', '2026-02-01', '2026-06-15')`,
+       (?, 'Mobile app launch', 'Prepare the first mobile app release.', '2026-02-01', '2026-06-15')
+       RETURNING id`,
       [team.insertId, team.insertId]
     );
-    const projectIds = [projects.insertId, projects.insertId + 1];
+    const projectIds = projects.rows.map((row) => row.id);
     const [members] = await connection.query(
       `INSERT INTO team_members (team_id, name, email, role) VALUES
        (?, 'Asha Patel', 'asha@example.com', 'Designer'),
        (?, 'Leo Chen', 'leo@example.com', 'Developer'),
-       (?, 'Mina Hassan', 'mina@example.com', 'Project manager')`,
+       (?, 'Mina Hassan', 'mina@example.com', 'Project manager')
+       RETURNING id`,
       [team.insertId, team.insertId, team.insertId]
     );
-    const memberIds = [members.insertId, members.insertId + 1, members.insertId + 2];
+    const memberIds = members.rows.map((row) => row.id);
     await connection.query(
       `INSERT INTO tasks (title, description, project_id, member_id, status, priority, due_date) VALUES
        (?, 'Collect feedback from the team.', ?, ?, 'To Do', 'Medium', '2026-03-10'),
